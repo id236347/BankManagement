@@ -86,8 +86,11 @@ public class UserCardsServiceImpl implements UserCardsService {
 
         User supposedOwner = supposedCard.getOwner();
 
+        log.info("supposed owner: {}", supposedOwner.getEmail());
+        log.info("authenticated user: {}", authenticatedUser.getEmail());
+
         // Я могу получить банковскую карту по айдишнику если авторизированный пользователь владелец карты.
-        if (supposedOwner.equals(authenticatedUser))
+        if (supposedOwner.getEmail().equals(authenticatedUser.getEmail()))
             return supposedCard;
 
         throw new NoViewingRightsException(

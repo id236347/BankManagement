@@ -1,7 +1,8 @@
 package bank.management.controllers;
 
+import bank.management.components.mappers.CardMapper;
+import bank.management.dto.CardDto;
 import bank.management.models.BankTransaction;
-import bank.management.models.Card;
 import bank.management.services.MaskCardService;
 import bank.management.services.UserCardsService;
 import jakarta.validation.Valid;
@@ -28,21 +29,28 @@ public class UserController {
 
     private final UserCardsService userCardsService;
     private final MaskCardService maskCardService;
+    private final CardMapper cardMapper;
 
     @Autowired
-    public UserController(UserCardsService userCardsService, MaskCardService maskCardService) {
+    public UserController(UserCardsService userCardsService, MaskCardService maskCardService, CardMapper cardMapper) {
         this.userCardsService = userCardsService;
         this.maskCardService = maskCardService;
+        this.cardMapper = cardMapper;
     }
 
     @GetMapping("/cards")
-    public ResponseEntity<Page<Card>> getMyCards(
+    public ResponseEntity<Page<CardDto>> getMyCards(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "4") int size,
             @RequestParam(defaultValue = "true") boolean isMask
     ) {
         return new ResponseEntity<>(
-                maskCardService.maskCardsOfPageable(PageRequest.of(page, size), userCardsService::getMyCards, isMask),
+                maskCardService
+                        .maskCardsOfPageable(
+                                PageRequest.of(page, size),
+                                userCardsService::getMyCards,
+                                isMask
+                        ).map(cardMapper::convertToCardDto),
                 HttpStatus.OK
         );
     }
@@ -58,11 +66,11 @@ public class UserController {
     }
 
     @GetMapping("/cards/{id}")
-    public ResponseEntity<Card> getCardById(
+    public ResponseEntity<CardDto> getCardById(
             @PathVariable int id,
             @RequestParam(defaultValue = "true") boolean isMask
     ) {
-        return new ResponseEntity<>(maskCardService.maskCardById(id, userCardsService::getCardById, isMask), HttpStatus.OK);
+        return new ResponseEntity<>(cardMapper.convertToCardDto(maskCardService.maskCardById(id, userCardsService::getCardById, isMask)), HttpStatus.OK);
     }
 
     @GetMapping("/cards/balances/{id}")
@@ -81,7 +89,6 @@ public class UserController {
         userCardsService.blockCard(id);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
-
 
 }
 
