@@ -3,7 +3,7 @@ package bank.management.controllers;
 import bank.management.components.mappers.CardMapper;
 import bank.management.dto.CardDto;
 import bank.management.dto.RegistrationUserDto;
-import bank.management.dto.UserDto;;
+import bank.management.dto.UserDto;
 import bank.management.services.AdministratorService;
 import bank.management.services.MaskCardService;
 import jakarta.validation.Valid;
@@ -43,7 +43,6 @@ public class AdminController {
 
     }
 
-    // OK
     @PostMapping("/cards")
     public ResponseEntity<HttpStatus> addCard(
             @RequestBody @Valid CardDto cardDto,
@@ -53,7 +52,6 @@ public class AdminController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    // OK
     @GetMapping("/cards/{id}")
     public ResponseEntity<CardDto> findCardById(
             @PathVariable int id,
@@ -65,7 +63,6 @@ public class AdminController {
         );
     }
 
-    // OK
     @GetMapping("/cards")
     public ResponseEntity<Set<CardDto>> findAllCards(@RequestParam(defaultValue = "true") boolean isMask) {
         return new ResponseEntity<>(
@@ -74,7 +71,6 @@ public class AdminController {
         );
     }
 
-    // OK
     @GetMapping("/cards/{page}/{size}")
     public ResponseEntity<Page<CardDto>> findAllCards(
             @PathVariable int page,
@@ -91,21 +87,18 @@ public class AdminController {
         );
     }
 
-    // OK
     @PatchMapping("/cards/{id}/unlock")
     public ResponseEntity<HttpStatus> unlockCard(@PathVariable int id) {
         administratorService.unblockCardById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // OK
     @DeleteMapping("/cards/{id}")
     public ResponseEntity<HttpStatus> destroyCard(@PathVariable int id) {
         administratorService.deleteCardById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // OK
     @PostMapping("/users")
     public ResponseEntity<HttpStatus> addUser(
             @RequestBody @Valid RegistrationUserDto user,
@@ -116,25 +109,21 @@ public class AdminController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    // OK
     @GetMapping("/user/{id}")
     public ResponseEntity<UserDto> findUserById(@PathVariable int id) {
         return new ResponseEntity<>(administratorService.findUserById(id), HttpStatus.OK);
     }
 
-    // OK
     @GetMapping("/users")
     public ResponseEntity<Set<UserDto>> findAllUsers() {
         return new ResponseEntity<>(administratorService.findAllUsers(), HttpStatus.OK);
     }
 
-    // OK
     @GetMapping("/users/{page}/{size}")
     public ResponseEntity<Page<UserDto>> findAllUsers(@PathVariable int page, @PathVariable int size) {
         return new ResponseEntity<>(administratorService.findAllUsers(PageRequest.of(page, size)), HttpStatus.OK);
     }
 
-    // OK
     @PatchMapping("/users/{id}")
     public ResponseEntity<HttpStatus> updateUser(
             @PathVariable int id,
@@ -145,14 +134,12 @@ public class AdminController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // OK
     @DeleteMapping("/users/{id}")
     public ResponseEntity<HttpStatus> destroyUser(@PathVariable int id) {
         administratorService.deleteUserById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // OK
     @PatchMapping("/cards/{id}/block")
     public ResponseEntity<HttpStatus> blockCard(@PathVariable int id) {
         administratorService.blockCard(id);

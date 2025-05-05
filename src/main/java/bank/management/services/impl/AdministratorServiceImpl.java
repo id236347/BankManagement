@@ -77,14 +77,19 @@ public class AdministratorServiceImpl implements AdministratorService {
     public void createCard(CardDto cardsDto, BindingResult bindingResult) {
 
         cardDtoValidator.validate(cardsDto, bindingResult);
-        ReportingErrorUtil.validate(bindingResult, "Сохранение банковской карты", CardDtoValidator.DEFAULT_ERROR_MSG);
+        ReportingErrorUtil.validate
+                (
+                        bindingResult,
+                        ReportingErrorUtil.SAVE_CARD_ACTION,
+                        ReportingErrorUtil.VALIDATE_CARD_ERROR_MSG
+                );
 
         // Проверяем существует ли подаваемый владелец.
         findUserById(cardsDto.getOwnerId());
 
         // Проверяем наличие карты по номеру.
         if (cardsRepository.findByNumber(cardsDto.getNumber()).isPresent())
-            throw new EntityAlreadyExistException("Создание банковской карты", "Карта с данным номер уже зарегистрирована!");
+            throw new EntityAlreadyExistException(ReportingErrorUtil.CREATE_USER_ACTION, ReportingErrorUtil.CARD_WITH_THIS_NUMBER_ALREADY_REGISTERED_MSG);
 
         cardsRepository.save(cardEncryptor.encryptCard(cardMapper.convertToCard(cardsDto)));
 
@@ -117,7 +122,7 @@ public class AdministratorServiceImpl implements AdministratorService {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unblockCardById(int cardId) {
         Card supposedCard = cardsRepository.findById(cardId)
-                .orElseThrow(() -> new CardNotFoundException("Активирование карты по id.", ReportingErrorUtil.CARD_NOT_FOUND_MSG));
+                .orElseThrow(() -> new CardNotFoundException(ReportingErrorUtil.ENABLE_CARD_ACTION, ReportingErrorUtil.CARD_NOT_FOUND_MSG));
         supposedCard.setStatus(Status.ACTIVE);
         cardsRepository.save(supposedCard);
     }
@@ -125,7 +130,9 @@ public class AdministratorServiceImpl implements AdministratorService {
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteCardById(int cardId) {
-        cardsRepository.findById(cardId).orElseThrow(() -> new CardNotFoundException("Удаление карты по id.", ReportingErrorUtil.CARD_NOT_FOUND_MSG));
+        cardsRepository.findById(cardId).orElseThrow(
+                () -> new CardNotFoundException(ReportingErrorUtil.REMOVE_CARD_BY_ID_ACTION, ReportingErrorUtil.CARD_NOT_FOUND_MSG)
+        );
         cardsRepository.deleteById(cardId);
     }
 
@@ -134,7 +141,7 @@ public class AdministratorServiceImpl implements AdministratorService {
     public void createUser(RegistrationUserDto user, BindingResult bindingResult, boolean isAdmin) {
 
 
-        ReportingErrorUtil.validate(bindingResult, "Регистрация или создание пользователя.", ReportingErrorUtil.DEFAULT_UPDATE_OR_SAVE_USER_MSG);
+        ReportingErrorUtil.validate(bindingResult, ReportingErrorUtil.REGISTRATION_ACTION, ReportingErrorUtil.DEFAULT_UPDATE_OR_SAVE_USER_MSG);
 
         User userToSave = userMapper.convertToUser(user);
 
@@ -172,9 +179,9 @@ public class AdministratorServiceImpl implements AdministratorService {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void updateUserById(UserDto user, int userId, BindingResult bindingResult) {
 
-        ReportingErrorUtil.validate(bindingResult, "Обновление или редактирование пользователя.", ReportingErrorUtil.DEFAULT_UPDATE_OR_SAVE_USER_MSG);
+        ReportingErrorUtil.validate(bindingResult, ReportingErrorUtil.UPDATE_OR_PATCH_USER_ACTION, ReportingErrorUtil.DEFAULT_UPDATE_OR_SAVE_USER_MSG);
 
-        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Обновление пользователя по id.", ReportingErrorUtil.USER_NOT_FOUND_MSG));
+        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ReportingErrorUtil.UPDATE_UPDATE_USER_BY_ID_ACTION, ReportingErrorUtil.USER_NOT_FOUND_MSG));
         User userToUpdate = userMapper.convertToUser(user);
         userToUpdate.setId(userId);
         userRepository.save(userToUpdate);
@@ -190,13 +197,17 @@ public class AdministratorServiceImpl implements AdministratorService {
         ));
 
         User userForRemove = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(
-                "Удаление пользователя по id.",
+                ReportingErrorUtil.REMOVE_USER_BY_ID_ACTION,
                 ReportingErrorUtil.USER_NOT_FOUND_MSG
         ));
 
         // Администратор не может удалить сам себя!
         if (authenticatedUser.getEmail().equals(userForRemove.getEmail()))
-            throw new DeletingYourselfException("Удаление пользователя.", "Администратор не может удалить сам себя!");
+            throw new DeletingYourselfException
+                    (
+                            ReportingErrorUtil.REMOVE_USER_BY_ID_ACTION,
+                            "Администратор не может удалить сам себя!"
+                    );
 
         userRepository.deleteById(userId);
     }
@@ -206,7 +217,7 @@ public class AdministratorServiceImpl implements AdministratorService {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void blockCard(int cardId) {
         Card supposedCard = cardsRepository.findById(cardId).orElseThrow(
-                () -> new CardNotFoundException("Блокировка карты по id.", ReportingErrorUtil.CARD_NOT_FOUND_MSG)
+                () -> new CardNotFoundException(ReportingErrorUtil.BAN_CARD_BY_ID_ACTION, ReportingErrorUtil.CARD_NOT_FOUND_MSG)
         );
         supposedCard.setStatus(Status.BLOCKED);
         cardsRepository.save(supposedCard);

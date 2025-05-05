@@ -4,6 +4,8 @@ package bank.management.validation;
 import bank.management.dto.CardDto;
 import bank.management.components.tool.YearMonthAttributeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -14,11 +16,14 @@ import java.util.ArrayList;
 import java.util.stream.IntStream;
 
 @Component
+@PropertySource("classpath:card-validator.properties")
 public class CardDtoValidator implements Validator {
+
+    @Value("${validator.luhn.link}")
+    private String linkToAlgorithm;
 
     private final YearMonthAttributeConverter yearMonthAttributeConverter;
 
-    public static final String DEFAULT_ERROR_MSG = "Ошибка валидации банковской карты";
 
     @Autowired
     public CardDtoValidator(YearMonthAttributeConverter yearMonthAttributeConverter) {
@@ -56,8 +61,7 @@ public class CardDtoValidator implements Validator {
             errors.rejectValue(
                     "number",
                     "",
-                    "Номер карты не прошел проверку алгоритмом Луна. " +
-                    "\nАлгоритм Луна: https://ru.wikipedia.org/wiki/%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC_%D0%9B%D1%83%D0%BD%D0%B0"
+                    "Номер карты не прошел проверку алгоритмом Луна. Алгоритм Луна: " + linkToAlgorithm
             );
         }
 

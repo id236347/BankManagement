@@ -1,6 +1,8 @@
 package bank.management.services.impl;
 
 import bank.management.components.security.Authenticator;
+import bank.management.exceptions.transfer.NegativeOrZeroTransferAmountException;
+import bank.management.exceptions.transfer.NotEnoughFundsException;
 import bank.management.exceptions.unauthorized.NoViewingRightsException;
 import bank.management.models.Card;
 import bank.management.models.Status;
@@ -105,7 +107,7 @@ public class UserCardsServiceImpl implements UserCardsService {
 
         // Проверка на суммы перевода отрицательность и равенство нулю.
         if (amount.equals(BigDecimal.ZERO) || amount.compareTo(BigDecimal.ZERO) < 0)
-            throw ReportingErrorUtil.createNegativeOrZeroTransferAmountException();
+            throw new NegativeOrZeroTransferAmountException(ReportingErrorUtil.TRANSFER_MONEY_ACTION, ReportingErrorUtil.INVALID_AMOUNT_MSG);
 
         Card from = getCardById(fromId);
         Card to = getCardById(toId);
@@ -115,7 +117,7 @@ public class UserCardsServiceImpl implements UserCardsService {
             from.setBalance(from.getBalance().subtract(amount));
             to.setBalance(to.getBalance().add(amount));
         } else {
-            throw ReportingErrorUtil.createNotEnoughFundsException();
+            throw new NotEnoughFundsException(ReportingErrorUtil.TRANSFER_MONEY_ACTION, ReportingErrorUtil.NO_MONEY_MSG);
         }
 
     }
