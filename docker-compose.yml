@@ -1,0 +1,24 @@
+services:
+  app:
+    container_name: 'management_app'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+
+  db:
+    image: postgres
+    container_name: bank_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: bank_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  pgdata:

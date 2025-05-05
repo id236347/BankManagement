@@ -1,0 +1,132 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2025-05-03_create_roles
+      author: danil
+
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: "SELECT COUNT(*) FROM roles WHERE id = 1"
+
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: name
+                  value: ROLE_ADMIN
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  value: 2
+              - column:
+                  name: name
+                  value: ROLE_USER
+  - changeSet:
+      id: 2025-05-04_insert_users_and_cards
+      author: danil
+
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: "SELECT COUNT(*) FROM users WHERE id = 1"
+
+      changes:
+        # Вставка администратора
+        - insert:
+            tableName: users
+            columns:
+              - column: {name: email, value: "admin@example.com"}
+              - column: {name: password, value: "$2a$10$72y5yYYAGmpIwWfiMTCbsuemEC6NxDrLcENxn3.n7iOswXfyVMk.2"} # testPassword
+              - column: {name: first_name, value: "Админ"}
+              - column: {name: last_name, value: "Администратор"}
+              - column: {name: patronymic, value: "Сергеевич"}
+
+        # Вставка роли администратора для пользователя 1
+        - insert:
+            tableName: users_and_roles
+            columns:
+              - column: {name: user_id, valueNumeric: 1}
+              - column: {name: role_id, valueNumeric: 1}
+
+        # Вставка пользователей 2 и 3
+        - insert:
+            tableName: users
+            columns:
+              - column: {name: email, value: "user1@example.com"}
+              - column: {name: password, value: "$2a$10$72y5yYYAGmpIwWfiMTCbsuemEC6NxDrLcENxn3.n7iOswXfyVMk.2"} # testPassword
+              - column: {name: first_name, value: "Иван"}
+              - column: {name: last_name, value: "Иванов"}
+              - column: {name: patronymic, value: "Иванович"}
+
+        - insert:
+            tableName: users_and_roles
+            columns:
+              - column: {name: user_id, valueNumeric: 2}
+              - column: {name: role_id, valueNumeric: 2}
+
+        - insert:
+            tableName: users
+            columns:
+              - column: {name: email, value: "user2@example.com"}
+              - column: {name: password, value: "$2a$10$72y5yYYAGmpIwWfiMTCbsuemEC6NxDrLcENxn3.n7iOswXfyVMk.2"} # testPassword
+              - column: {name: first_name, value: "Петр"}
+              - column: {name: last_name, value: "Петров"}
+              - column: {name: patronymic, value: "Петрович"}
+
+        - insert:
+            tableName: users_and_roles
+            columns:
+              - column: {name: user_id, valueNumeric: 3}
+              - column: {name: role_id, valueNumeric: 2}
+
+        # Вставка 2 карт для пользователя 2 (id=2)
+        - insert:
+            tableName: cards
+            columns:
+              - column: {name: number, value: "gimaRMeC4uVadtkKXY+RjCuZBBcpObyHJytRajhMzAk="} # 4556 7375 8689 9855
+              - column: {name: cvc, value: "DUG4DtQEQqFvmG1Vf6c46w=="} # 123
+              - column: {name: user_id, valueNumeric: 2}
+              - column: {name: expiry_date, value: "12/2026"}
+              - column: {name: status, value: "ACTIVE"}
+              - column: {name: balance, valueNumeric: 1000.00}
+
+        - insert:
+            tableName: cards
+            columns:
+              - column: {name: number, value: "6yVUcMsVVJFY0vzruYSsAlz9dqg2EXwpnrB7wajARr0="} # 5115 1234 5678 9875
+              - column: {name: cvc, value: "f0a2meHWqmZCOIcKXmtXgw=="} # 456
+              - column: {name: user_id, valueNumeric: 2}
+              - column: {name: expiry_date, value: "06/2027"}
+              - column: {name: status, value: "ACTIVE"}
+              - column: {name: balance, valueNumeric: 2000.00}
+
+        # Вставка 2 карт для пользователя 3 (id=3)
+        - insert:
+            tableName: cards
+            columns:
+              - column: { name: number, value: "hgmv44mdkZGMPRw6o/BUnumq2hD09/cm/VcCoooL1CM=" } # 6011 1111 1111 1117
+              - column: { name: cvc, value: "1XYgk52Cl+3Cn3ElOvQJgQ==" } # 789
+              - column: { name: user_id, valueNumeric: 3 }
+              - column: { name: expiry_date, value: "10/2026" }
+              - column: { name: status, value: "ACTIVE" }
+              - column: { name: balance, valueNumeric: 1500.00 }
+
+        - insert:
+            tableName: cards
+            columns:
+              - column: { name: number, value: "Bi/fd9sMAT1EtCmJhfTAVImg/doIS3rnWN0soeTWNbY=" } # 4539 1488 0343 6467
+              - column: { name: cvc, value: "+i2QdsQICfWonV3q5iU1QA==" } # 321
+              - column: { name: user_id, valueNumeric: 3 }
+              - column: { name: expiry_date, value: "03/2026" }
+              - column: { name: status, value: "ACTIVE" }
+              - column: { name: balance, valueNumeric: 2500.00 }
+
+
