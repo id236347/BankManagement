@@ -9,6 +9,7 @@ import bank.management.dto.UserDto;
 import bank.management.exceptions.conflicts.core.DeletingYourselfException;
 import bank.management.exceptions.conflicts.core.EntityAlreadyExistException;
 import bank.management.exceptions.unauthorized.UnauthorizedException;
+import bank.management.exceptions.unfound.CardNotFoundException;
 import bank.management.exceptions.unfound.RoleNotFoundException;
 import bank.management.exceptions.unfound.UserNotFoundException;
 import bank.management.models.Card;
@@ -115,7 +116,8 @@ public class AdministratorServiceImpl implements AdministratorService {
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void unblockCardById(int cardId) {
-        Card supposedCard = cardsRepository.findById(cardId).orElseThrow(ReportingErrorUtil::createCardNotFoundException);
+        Card supposedCard = cardsRepository.findById(cardId)
+                .orElseThrow(() -> new CardNotFoundException("Активирование карты по id.", ReportingErrorUtil.CARD_NOT_FOUND_MSG));
         supposedCard.setStatus(Status.ACTIVE);
         cardsRepository.save(supposedCard);
     }
@@ -123,7 +125,7 @@ public class AdministratorServiceImpl implements AdministratorService {
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteCardById(int cardId) {
-        cardsRepository.findById(cardId).orElseThrow(ReportingErrorUtil::createCardNotFoundException);
+        cardsRepository.findById(cardId).orElseThrow(() -> new CardNotFoundException("Удаление карты по id.", ReportingErrorUtil.CARD_NOT_FOUND_MSG));
         cardsRepository.deleteById(cardId);
     }
 
@@ -132,7 +134,7 @@ public class AdministratorServiceImpl implements AdministratorService {
     public void createUser(RegistrationUserDto user, BindingResult bindingResult, boolean isAdmin) {
 
 
-        ReportingErrorUtil.validate(bindingResult, "Регистрация или создание пользователя", ReportingErrorUtil.DEFAULT_UPDATE_OR_SAVE_USER_MSG);
+        ReportingErrorUtil.validate(bindingResult, "Регистрация или создание пользователя.", ReportingErrorUtil.DEFAULT_UPDATE_OR_SAVE_USER_MSG);
 
         User userToSave = userMapper.convertToUser(user);
 
@@ -170,9 +172,9 @@ public class AdministratorServiceImpl implements AdministratorService {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void updateUserById(UserDto user, int userId, BindingResult bindingResult) {
 
-        ReportingErrorUtil.validate(bindingResult, "Обновление или редактирование пользователя", ReportingErrorUtil.DEFAULT_UPDATE_OR_SAVE_USER_MSG);
+        ReportingErrorUtil.validate(bindingResult, "Обновление или редактирование пользователя.", ReportingErrorUtil.DEFAULT_UPDATE_OR_SAVE_USER_MSG);
 
-        userRepository.findById(userId).orElseThrow(ReportingErrorUtil::createUserNotFoundException);
+        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Обновление пользователя по id.", ReportingErrorUtil.USER_NOT_FOUND_MSG));
         User userToUpdate = userMapper.convertToUser(user);
         userToUpdate.setId(userId);
         userRepository.save(userToUpdate);
@@ -183,18 +185,18 @@ public class AdministratorServiceImpl implements AdministratorService {
     public void deleteUserById(int userId) {
 
         User authenticatedUser = authenticator.getAuthenticatedUser().orElseThrow(() -> new UnauthorizedException(
-                "Получения данных авторизованного администратора при удалении пользователя",
+                "Получения данных авторизованного администратора при удалении пользователя.",
                 ReportingErrorUtil.USER_NOT_AUTHENTICATED_MSG
         ));
 
         User userForRemove = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(
-                ReportingErrorUtil.SEARCH_USER_BY_ID_ACTION,
+                "Удаление пользователя по id.",
                 ReportingErrorUtil.USER_NOT_FOUND_MSG
         ));
 
         // Администратор не может удалить сам себя!
         if (authenticatedUser.getEmail().equals(userForRemove.getEmail()))
-            throw new DeletingYourselfException("Удаление пользователя", "Администратор не может удалить сам себя!");
+            throw new DeletingYourselfException("Удаление пользователя.", "Администратор не может удалить сам себя!");
 
         userRepository.deleteById(userId);
     }
@@ -203,7 +205,9 @@ public class AdministratorServiceImpl implements AdministratorService {
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void blockCard(int cardId) {
-        Card supposedCard = cardsRepository.findById(cardId).orElseThrow(ReportingErrorUtil::createCardNotFoundException);
+        Card supposedCard = cardsRepository.findById(cardId).orElseThrow(
+                () -> new CardNotFoundException("Блокировка карты по id.", ReportingErrorUtil.CARD_NOT_FOUND_MSG)
+        );
         supposedCard.setStatus(Status.BLOCKED);
         cardsRepository.save(supposedCard);
     }

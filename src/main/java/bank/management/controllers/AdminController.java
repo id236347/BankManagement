@@ -91,12 +91,14 @@ public class AdminController {
         );
     }
 
+    // OK
     @PatchMapping("/cards/{id}/unlock")
     public ResponseEntity<HttpStatus> unlockCard(@PathVariable int id) {
         administratorService.unblockCardById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    // OK
     @DeleteMapping("/cards/{id}")
     public ResponseEntity<HttpStatus> destroyCard(@PathVariable int id) {
         administratorService.deleteCardById(id);
