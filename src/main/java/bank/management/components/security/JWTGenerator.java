@@ -1,4 +1,4 @@
-package bank.management.components;
+package bank.management.components.security;
 
 import bank.management.models.Role;
 import com.auth0.jwt.JWT;
@@ -12,7 +12,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;

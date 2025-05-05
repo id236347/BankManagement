@@ -1,6 +1,5 @@
-package bank.management.util;
+package bank.management.components.tool;
 
-import bank.management.components.KeyHelper;
 import bank.management.exceptions.encryption.EncryptorProcessException;
 import bank.management.models.Card;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +16,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class CardEncryptorUtil {
+public class CardEncryptor {
 
     private final KeyHelper keyHelper;
 
     @Autowired
-    public CardEncryptorUtil(KeyHelper keyHelper) {
+    public CardEncryptor(KeyHelper keyHelper) {
         this.keyHelper = keyHelper;
     }
 

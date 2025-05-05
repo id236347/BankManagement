@@ -1,8 +1,8 @@
 package bank.management.services.impl;
 
-import bank.management.components.Authenticator;
-import bank.management.components.CardMapper;
-import bank.management.components.UserMapper;
+import bank.management.components.security.Authenticator;
+import bank.management.components.mappers.CardMapper;
+import bank.management.components.mappers.UserMapper;
 import bank.management.dto.CardDto;
 import bank.management.dto.RegistrationUserDto;
 import bank.management.dto.UserDto;
@@ -19,7 +19,7 @@ import bank.management.repositories.CardsRepository;
 import bank.management.repositories.RoleRepository;
 import bank.management.repositories.UserRepository;
 import bank.management.services.AdministratorService;
-import bank.management.util.CardEncryptorUtil;
+import bank.management.components.tool.CardEncryptor;
 import bank.management.util.ReportingErrorUtil;
 import bank.management.validation.CardDtoValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,18 +46,27 @@ public class AdministratorServiceImpl implements AdministratorService {
     private final CardsRepository cardsRepository;
     private final CardMapper cardMapper;
     private final UserMapper userMapper;
-    private final CardEncryptorUtil cardEncryptorUtil;
+    private final CardEncryptor cardEncryptor;
     private final CardDtoValidator cardDtoValidator;
     private final Authenticator authenticator;
 
     @Autowired
-    public AdministratorServiceImpl(UserRepository userRepository, RoleRepository roleRepository, CardsRepository cardsRepository, CardMapper cardMapper, UserMapper userMapper, CardEncryptorUtil cardEncryptorUtil, CardDtoValidator cardDtoValidator, Authenticator authenticator) {
+    public AdministratorServiceImpl(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            CardsRepository cardsRepository,
+            CardMapper cardMapper,
+            UserMapper userMapper,
+            CardEncryptor cardEncryptor,
+            CardDtoValidator cardDtoValidator,
+            Authenticator authenticator
+    ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.cardsRepository = cardsRepository;
         this.cardMapper = cardMapper;
         this.userMapper = userMapper;
-        this.cardEncryptorUtil = cardEncryptorUtil;
+        this.cardEncryptor = cardEncryptor;
         this.cardDtoValidator = cardDtoValidator;
         this.authenticator = authenticator;
     }
@@ -76,27 +85,27 @@ public class AdministratorServiceImpl implements AdministratorService {
         if (cardsRepository.findByNumber(cardsDto.getNumber()).isPresent())
             throw new EntityAlreadyExistException("Создание банковской карты", "Карта с данным номер уже зарегистрирована!");
 
-        cardsRepository.save(cardEncryptorUtil.encryptCard(cardMapper.convertToCard(cardsDto)));
+        cardsRepository.save(cardEncryptor.encryptCard(cardMapper.convertToCard(cardsDto)));
 
     }
 
     @Override
     public Card findCardById(int cardId) {
         Card card = cardsRepository.findById(cardId).orElseThrow(ReportingErrorUtil::createCardNotFoundException);
-        card = cardEncryptorUtil.decryptCard(card);
+        card = cardEncryptor.decryptCard(card);
         return card;
     }
 
     @Override
     public Set<Card> findAllCards() {
-        return new HashSet<>(cardsRepository.findAll()).stream().map(cardEncryptorUtil::decryptCard).collect(Collectors.toSet());
+        return new HashSet<>(cardsRepository.findAll()).stream().map(cardEncryptor::decryptCard).collect(Collectors.toSet());
     }
 
     @Override
     public Page<Card> findAllCards(Pageable pageable) {
         Page<Card> cardsPage = cardsRepository.findAll(pageable);
         Set<Card> decryptedCards = cardsPage.getContent().stream()
-                .map(cardEncryptorUtil::decryptCard)
+                .map(cardEncryptor::decryptCard)
                 .collect(Collectors.toSet());
 
         return new PageImpl<>(new ArrayList<>(decryptedCards), pageable, cardsPage.getTotalElements());

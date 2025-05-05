@@ -1,4 +1,4 @@
-package bank.management.components;
+package bank.management.components.mappers;
 
 import bank.management.dto.CardDto;
 import bank.management.exceptions.validation.card.core.CardValidationException;
@@ -7,7 +7,7 @@ import bank.management.models.Card;
 import bank.management.models.Status;
 import bank.management.repositories.UserRepository;
 import bank.management.util.ReportingErrorUtil;
-import bank.management.util.YearMonthAttributeConverter;
+import bank.management.components.tool.YearMonthAttributeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

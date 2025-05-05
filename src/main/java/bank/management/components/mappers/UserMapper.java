@@ -1,4 +1,4 @@
-package bank.management.components;
+package bank.management.components.mappers;
 
 import bank.management.dto.RegistrationUserDto;
 import bank.management.dto.UserDto;

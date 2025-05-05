@@ -1,4 +1,4 @@
-package bank.management.components;
+package bank.management.components.security;
 
 import bank.management.exceptions.unfound.InvalidLoginOrPasswordException;
 import bank.management.models.User;

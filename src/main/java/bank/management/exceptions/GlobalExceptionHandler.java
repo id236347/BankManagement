@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 
 @Slf4j
 @ControllerAdvice
@@ -73,6 +74,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(generateBankError(e), HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(JWTVerificationException.class)
+    public ResponseEntity<BankError> handleJWTVerificationException(JWTVerificationException e) {
+        return new ResponseEntity<>(
+                generateBankError(new BankException("Проверка токена", "Токен невалидный или истек срок действия!")),
+                HttpStatus.UNAUTHORIZED
+        );
+    }
 
     private BankError generateBankError(BankException b) {
         return new BankError(b.getAction(), b.getMessage());

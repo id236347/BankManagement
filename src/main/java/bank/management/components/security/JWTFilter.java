@@ -1,6 +1,6 @@
-package bank.management.components;
+package bank.management.components.security;
 
-import bank.management.models.Role;
+import bank.management.components.tool.BadResponseCreator;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -12,17 +12,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -50,15 +49,18 @@ public class JWTFilter extends OncePerRequestFilter {
      */
     private final UserDetailsService userDetailsService;
 
+    private final BadResponseCreator badResponseCreator;
+
     /**
      * Часто используемое сообщение об ошибке выношу в константу.
      */
     public static final String INVALID_TOKEN = "Невалидный токен!";
 
     @Autowired
-    public JWTFilter(JWTGenerator generator, UserDetailsService userDetailsService) {
+    public JWTFilter(JWTGenerator generator, UserDetailsService userDetailsService, BadResponseCreator badResponseCreator) {
         this.generator = generator;
         this.userDetailsService = userDetailsService;
+        this.badResponseCreator = badResponseCreator;
     }
 
 
@@ -102,10 +104,10 @@ public class JWTFilter extends OncePerRequestFilter {
                     // Валидирую токен.
                     String login = generator.validate(token).get(JWTGenerator.LOGIN_CLAIM);
                     // Пытаюсь достать пользователя по логину из токена.
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(login);
-                    log.info("Authorities: {}", ((Set<Role>)userDetails.getAuthorities()).stream().map(Role::getName).toList());
 
-                    if (userDetails == null || userDetails.getPassword() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(login);
+
+                    if (userDetails.getPassword() == null) {
                         response.sendError(HttpServletResponse.SC_BAD_REQUEST, INVALID_TOKEN);
                         return;
                     }
@@ -122,8 +124,24 @@ public class JWTFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(authToken);
 
                     // Если что-то не так при аутентификации, то кидаю 400.
+                } catch (UsernameNotFoundException e) {
+                    badResponseCreator.createBadResponse
+                            (
+                                    response,
+                                    HttpServletResponse.SC_NOT_FOUND,
+                                    "Поиск пользователя при аутентификации.",
+                                    "Пользователя заложенный в токен не найден!"
+                            );
+                    return;
                 } catch (JWTVerificationException jwt) {
-                    response.setStatus(HttpStatus.BAD_REQUEST.value());
+                    log.error("JWTVerificationException! msg = {}", jwt.getMessage());
+                    badResponseCreator.createBadResponse
+                            (
+                                    response,
+                                    HttpServletResponse.SC_UNAUTHORIZED,
+                                    "Проверка токена.",
+                                    "Истек срок действия токена или токен некорректный!"
+                            );
                     return;
                 }
             }
@@ -142,11 +160,6 @@ public class JWTFilter extends OncePerRequestFilter {
      */
     private boolean isAllowed(String currentEndpoint, List<String> allowedEndpoints) {
         for (String endpoint : allowedEndpoints) {
-            log.info("current endpoint : {}", currentEndpoint);
-            log.info("allowed endpoint : {}", endpoint);
-            log.info("formed allowed endpoint : {}", endpoint.replaceAll("\\*", ""));
-            log.info("contains ? -> {}", currentEndpoint.contains(endpoint.replaceAll("\\*", "")));
-            log.info("equals? -> {}", currentEndpoint.equals(endpoint));
             if (currentEndpoint.contains(endpoint.replaceAll("\\*", "")))
                 return true;
         }

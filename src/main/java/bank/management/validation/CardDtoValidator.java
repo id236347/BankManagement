@@ -2,7 +2,7 @@ package bank.management.validation;
 
 
 import bank.management.dto.CardDto;
-import bank.management.util.YearMonthAttributeConverter;
+import bank.management.components.tool.YearMonthAttributeConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;

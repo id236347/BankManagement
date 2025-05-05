@@ -1,6 +1,6 @@
 package bank.management.controllers;
 
-import bank.management.components.CardMapper;
+import bank.management.components.mappers.CardMapper;
 import bank.management.dto.CardDto;
 import bank.management.dto.RegistrationUserDto;
 import bank.management.dto.UserDto;;

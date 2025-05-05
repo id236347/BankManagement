@@ -1,7 +1,7 @@
 package bank.management.configurations;
 
-import bank.management.components.BankAccessDeniedHandler;
-import bank.management.components.JWTFilter;
+import bank.management.components.security.BankAccessDeniedHandler;
+import bank.management.components.security.JWTFilter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 

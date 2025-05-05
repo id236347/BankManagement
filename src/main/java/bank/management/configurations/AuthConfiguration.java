@@ -1,5 +1,6 @@
 package bank.management.configurations;
 
+import bank.management.components.security.Authenticator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,7 +10,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 public class AuthConfiguration {
 
     /**
-     * Бин для {@link bank.management.components.Authenticator}.
+     * Бин для {@link Authenticator}.
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {

@@ -1,7 +1,7 @@
 package bank.management.services.impl;
 
-import bank.management.components.Authenticator;
-import bank.management.components.JWTGenerator;
+import bank.management.components.security.Authenticator;
+import bank.management.components.security.JWTGenerator;
 import bank.management.dto.RegistrationUserDto;
 import bank.management.dto.AuthorizationUserDto;
 import bank.management.exceptions.unfound.InvalidLoginOrPasswordException;

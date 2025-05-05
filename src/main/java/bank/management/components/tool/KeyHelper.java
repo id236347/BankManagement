@@ -1,4 +1,4 @@
-package bank.management.components;
+package bank.management.components.tool;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

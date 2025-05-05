@@ -1,6 +1,6 @@
 package bank.management.models;
 
-import bank.management.util.YearMonthAttributeConverter;
+import bank.management.components.tool.YearMonthAttributeConverter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;

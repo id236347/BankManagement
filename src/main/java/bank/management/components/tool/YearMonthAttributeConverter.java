@@ -1,4 +1,4 @@
-package bank.management.util;
+package bank.management.components.tool;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

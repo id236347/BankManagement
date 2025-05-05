@@ -1,6 +1,5 @@
 package bank.management.services.impl;
 
-import bank.management.dto.CardDto;
 import bank.management.models.Card;
 import bank.management.services.Converter;
 import bank.management.services.MaskCardService;

@@ -1,6 +1,6 @@
 package bank.management.services.impl;
 
-import bank.management.components.Authenticator;
+import bank.management.components.security.Authenticator;
 import bank.management.exceptions.unauthorized.NoViewingRightsException;
 import bank.management.models.Card;
 import bank.management.models.Status;
@@ -8,7 +8,7 @@ import bank.management.models.User;
 import bank.management.repositories.CardsRepository;
 import bank.management.services.AdministratorService;
 import bank.management.services.UserCardsService;
-import bank.management.util.CardEncryptorUtil;
+import bank.management.components.tool.CardEncryptor;
 import bank.management.util.ReportingErrorUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +34,13 @@ public class UserCardsServiceImpl implements UserCardsService {
 
     private final Authenticator authenticator;
     private final CardsRepository cardsRepository;
-    private final CardEncryptorUtil cardEncryptorUtil;
+    private final CardEncryptor cardEncryptor;
 
     @Autowired
-    public UserCardsServiceImpl(Authenticator authenticator, CardsRepository cardsRepository, CardEncryptorUtil cardEncryptorUtil) {
+    public UserCardsServiceImpl(Authenticator authenticator, CardsRepository cardsRepository, CardEncryptor cardEncryptor) {
         this.authenticator = authenticator;
         this.cardsRepository = cardsRepository;
-        this.cardEncryptorUtil = cardEncryptorUtil;
+        this.cardEncryptor = cardEncryptor;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class UserCardsServiceImpl implements UserCardsService {
                 pageable
         );
 
-        return cardEncryptorUtil.decryptCards(cardsPage, pageable);
+        return cardEncryptor.decryptCards(cardsPage, pageable);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class UserCardsServiceImpl implements UserCardsService {
     public Card getCardById(int cardId) {
 
         User authenticatedUser = authenticator.getAuthenticatedUser().orElseThrow(ReportingErrorUtil::createCardInfoAuthException);
-        Card supposedCard = cardEncryptorUtil.decryptCard(
+        Card supposedCard = cardEncryptor.decryptCard(
                 cardsRepository
                         .findById(cardId)
                         .orElseThrow(ReportingErrorUtil::createCardNotFoundException)
