@@ -103,6 +103,7 @@ public class AdminController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    // OK
     @PostMapping("/users")
     public ResponseEntity<HttpStatus> addUser(
             @RequestBody @Valid RegistrationUserDto user,

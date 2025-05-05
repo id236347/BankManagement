@@ -128,13 +128,16 @@ public class AdministratorServiceImpl implements AdministratorService {
         User userToSave = userMapper.convertToUser(user);
 
         Optional<Role> roleForUser = roleRepository.findByName(isAdmin ? "ROLE_ADMIN" : "ROLE_USER");
+
         Role defaultRole = roleForUser.orElseThrow(() -> new RoleNotFoundException(
                         ReportingErrorUtil.REGISTRATION_ACTION,
                         "Роли НЕ инициализированы на сервере!"
                 )
         );
 
-        userRepository.save(userMapper.convertToUser(user));
+        userToSave.setRoles(new HashSet<>(Set.of(defaultRole)));
+
+        userRepository.save(userToSave);
     }
 
     @Override

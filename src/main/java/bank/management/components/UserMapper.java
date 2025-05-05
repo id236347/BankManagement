@@ -33,6 +33,7 @@ public class UserMapper {
                 .fullName(registrationUserDto.getFullName())
                 .email(registrationUserDto.getEmail())
                 .password(registrationUserDto.getPassword())
+
                 .build();
     }
 
